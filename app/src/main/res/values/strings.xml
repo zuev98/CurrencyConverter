@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">CurrencyConverter</string>
+    <string name="nominal">Номинал:</string>
+    <string name="value">Курс:</string>
+    <string name="rub">RUB</string>
+    <string name="_1">1</string>
+    <string name="convert_to">Перевести в</string>
+    <string name="convert_to_currency">Желаемая валюта</string>
+</resources>
