@@ -1,13 +1,14 @@
 package com.github.zuev98.currencyconverter.presentation.ui.vm
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.zuev98.currencyconverter.data.entity.Currency
 import com.github.zuev98.currencyconverter.domain.usecases.GetCurrenciesUseCase
 import com.github.zuev98.currencyconverter.presentation.state.State
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.IOException
 import javax.inject.Inject
@@ -16,9 +17,9 @@ import javax.inject.Inject
 class CurrencyViewModel @Inject constructor(
     private val getCurrenciesUseCase: GetCurrenciesUseCase
 ) : ViewModel() {
-    private var _currency = MutableLiveData<State<List<Currency>>>()
-    val currency: LiveData<State<List<Currency>>>
-        get() = _currency
+    private var _currency = MutableStateFlow<State<List<Currency>>?>(null)
+    val currency: StateFlow<State<List<Currency>>?>
+        get() = _currency.asStateFlow()
 
     fun getCurrencies(isRemote: Boolean) {
         viewModelScope.launch {

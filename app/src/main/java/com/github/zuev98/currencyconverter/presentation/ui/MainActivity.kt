@@ -10,7 +10,10 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.github.zuev98.currencyconverter.databinding.ActivityMainBinding
 import com.github.zuev98.currencyconverter.presentation.state.ResponseStatus
@@ -19,6 +22,7 @@ import com.github.zuev98.currencyconverter.presentation.ui.vm.CurrencyViewModel
 import com.github.zuev98.currencyconverter.presentation.util.APP_PREFERENCES
 import com.github.zuev98.currencyconverter.presentation.util.APP_PREFERENCES_POSITION
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 private const val IS_DATA_SET_KEY = "is data set"
 
@@ -49,18 +53,24 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             loadData()
         }
 
-        currencyViewModel.currency.observe(this) { state ->
-            when (state.responseStatus) {
-                ResponseStatus.SUCCESS -> {
-                    state.data?.let {
-                        adapter.submitList(it)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                currencyViewModel.currency.collect { state ->
+                    if (state != null) {
+                        when (state.responseStatus) {
+                            ResponseStatus.SUCCESS -> {
+                                state.data?.let {
+                                    adapter.submitList(it)
 
-                        binding.lastUpdate.text = it[0].lastUpdate
-                        updateSpinner(currencyViewModel.getCurrencyCharCodeList())
-                        convert()
+                                    binding.lastUpdate.text = it[0].lastUpdate
+                                    updateSpinner(currencyViewModel.getCurrencyCharCodeList())
+                                    convert()
+                                }
+                            }
+                            ResponseStatus.ERROR -> state.message?.let { showError(it) }
+                        }
                     }
                 }
-                ResponseStatus.ERROR -> state.message?.let { showError(it) }
             }
         }
     }
